@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class p1 {
+public class p7 {
     static int gcd(int m, int n) {
         while (n != 0) {
             int r = m % n;
