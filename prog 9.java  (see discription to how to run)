@@ -1,4 +1,4 @@
-//server code
+// client code
 
 import java.net.*;
 import java.io.*;
@@ -36,61 +36,45 @@ public class TCPClient {
 }
 
 
-//client code
-
-
+// server
 
 
 import java.net.*;
 import java.io.*;
 
-public class TCPClient {
+public class TCPServer {
     public static void main(String args[]) throws Exception {
-        // Connect to the server
-        Socket sock = new Socket("127.0.0.1", 4000);
-        System.out.println("Enter the filename:");
+        // Start the server and wait for a client connection
+        ServerSocket sersock = new ServerSocket(4000);
+        System.out.println("Server ready for connection...");
 
-        // Read filename from user input
-        BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
-        String fname = keyRead.readLine();
+        Socket sock = sersock.accept();
+        System.out.println("Connection is successful and waiting for file request...");
 
-        // Send the filename to the server
+        // Read the filename from the client
+        InputStream istream = sock.getInputStream();
+        BufferedReader fileRead = new BufferedReader(new InputStreamReader(istream));
+        String fname = fileRead.readLine();
+
+        // Prepare to send the file contents to the client
         OutputStream ostream = sock.getOutputStream();
         PrintWriter pwrite = new PrintWriter(ostream, true);
-        pwrite.println(fname);
 
-        // Read the file contents from the server
-        InputStream istream = sock.getInputStream();
-        BufferedReader socketRead = new BufferedReader(new InputStreamReader(istream));
-        String str;
-        System.out.println("File contents received from the server:");
-        while ((str = socketRead.readLine()) != null) {
-            System.out.println(str);
+        try {
+            BufferedReader contentRead = new BufferedReader(new FileReader(fname));
+            String str;
+            while ((str = contentRead.readLine()) != null) {
+                pwrite.println(str);
+            }
+            contentRead.close();
+        } catch (FileNotFoundException e) {
+            pwrite.println("Error: File not found.");
         }
 
         // Close all streams and the socket
         pwrite.close();
-        socketRead.close();
-        keyRead.close();
+        fileRead.close();
         sock.close();
+        sersock.close();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
